@@ -1,5 +1,6 @@
 ﻿namespace MapGenerator
 {
+    using System.Diagnostics;
     using System.Drawing;
 
     internal class Program
@@ -7,18 +8,28 @@
         static void Main(string[] args)
         {
             int bright_step = 3;
-            int width  = 400;
+            int width = 400;
             int height = 400;
 
             // Количество итераций сглаживания
             int iterations = 100;
-            //Шумность карты (0 - 1)
-            double noise   = 0.4;
+            //Шумность первичного паттерна (0 - 1)
+            double noise = 0.3;
 
             double[,] map = new double[width, height];
             bool[,] rmap = new bool[width, height];
             Random rnd = new Random();
 
+            //презагружаем градиент
+            Bitmap gradient = new Bitmap("gradient-1.png");
+            Color[] gradientColors = new Color[gradient.Width];
+            int gradientColorsCount = gradient.Width;
+            for (int x = 0; x < gradient.Width; x++)
+            {
+                gradientColors[x] = gradient.GetPixel(x, 0);
+            }
+
+            //функция для нормализации карты высот
             void Normilize()
             {
                 //Нормализуем карту высот
@@ -39,6 +50,7 @@
                 }
             }
 
+            //функция для отрисовки карты высот в файл
             void Render(string filename)
             {
                 Bitmap bmp = new Bitmap(width, height);
@@ -48,8 +60,8 @@
                     for (int x = 0; x < width; x++)
                     {
                         double normalizedHeight = map[x, y];
-                        byte brightness = (byte)(normalizedHeight * 255);
-                        Color c = Color.FromArgb(brightness, brightness, brightness);
+                        int colorIndex = (int)(normalizedHeight * (gradientColorsCount - 1));
+                        Color c = gradientColors[colorIndex];
 
                         bmp.SetPixel(x, y, c);
                     }
@@ -119,10 +131,11 @@
 
                 map = bmap;
                 Normilize(); // Нормализуем карту после каждой итерации сглаживания
-                //Render();
             }
 
-            Render("image.png");
+            string filename = "image.png";
+            Render(filename);
+            Process.Start(new ProcessStartInfo(filename) { UseShellExecute = true });
         }
     }
 }
