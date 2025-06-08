@@ -7,7 +7,6 @@
     {
         static void Main(string[] args)
         {
-            int bright_step = 3;
             int width = 400;
             int height = 400;
 
