@@ -1,16 +1,14 @@
 ﻿namespace MapGenerator
 {
+    using System.Drawing;
+
     internal class Program
     {
         static void Main(string[] args)
         {
-            Console.ReadLine();
-
             int bright_step = 3;
             int width  = 400;
             int height = 400;
-
-            Console.SetBufferSize(Math.Max(width * 2 + 1, Console.BufferWidth), Math.Max(height + 5, Console.BufferHeight));
 
             // Количество итераций сглаживания
             int iterations = 100;
@@ -41,21 +39,23 @@
                 }
             }
 
-            void Render()
+            void Render(string filename)
             {
-                string gradient = " `.-':_,^=;><+!rc*/z?sLTv)J7(|Fi{C}fI31tlu[neoZ5Yxjya]2ESwqkP6h9d4VpOGbUAKXHm8RD#$Bg0MNWQ%&@"; // Градиент символов от низкого к высокому
+                Bitmap bmp = new Bitmap(width, height);
 
                 for (int y = 0; y < height; y++)
                 {
                     for (int x = 0; x < width; x++)
                     {
-                        double normalizedHeight = map[x, y]; // Значение высоты от 0 до 1
-                        int gradientIndex = (int)(normalizedHeight * (gradient.Length - 1) / bright_step) * bright_step; // Индекс символа в градиенте
-                        Console.Write(gradient[gradientIndex]);
-                        Console.Write(gradient[gradientIndex]);
+                        double normalizedHeight = map[x, y];
+                        byte brightness = (byte)(normalizedHeight * 255);
+                        Color c = Color.FromArgb(brightness, brightness, brightness);
+
+                        bmp.SetPixel(x, y, c);
                     }
-                    Console.WriteLine(); // Переход на новую строку после каждой строки карты
                 }
+
+                bmp.Save(filename);
             }
 
             //Случайное заполнение карты заполнености
@@ -122,9 +122,7 @@
                 //Render();
             }
 
-            Render();
-
-            Console.ReadLine();
+            Render("image.png");
         }
     }
 }
